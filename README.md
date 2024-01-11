@@ -101,4 +101,4 @@ $ mvn clean package
 
 ## License
 
-This product is licensed under the GPLv3 license. If you require a different licensen, please do contact me.
+This product is licensed under the GPLv3 license. If you require a different license, please do contact me.
