@@ -1,0 +1,161 @@
+#% text_encoding = iso8859_1
+_package user
+
+_pragma(classify_level=advanced, topic={java_object_wrapper})
+_method java_object_wrapper.does_not_understand(message, private?)
+	## Does not understand.
+	## @param {sw:message} message
+	## @param {sw:false} private?
+	## @return {sw:object}
+	_local selector << message.selector
+	_if selector.matches?(:|*!*|) _orif
+	    selector.matches?(:|*<<*|)
+	_then
+		_return _super.does_not_understand(message, private?)
+	_elif selector.matches?(:|*()|)
+	_then
+		_local method_name << selector.subseq(1, selector.size - 2).write_string.as_camel_case()
+		_return _self.int!invoke_method(method_name,  _scatter message.args)
+	_endif
+
+	_local field_name << selector.write_string.as_camel_case()
+	_return _self.int!get_field_value(field_name)
+_endmethod
+$
+
+_pragma(classify_level=advanced, topic={java_object_wrapper})
+_method java_object_wrapper.responds_to?(message_name, _optional private?)
+	## Responds to handler.
+	## @param {sw:symbol|sw:char16_vector} message_name
+	## @param {sw:false} private?
+	## @return {sw:false}
+	_if message_name.matches?(:|*!*|) _orif
+	    message_name.matches?(:|*<<*|)
+	_then
+		# Handle non-sensical method names by Smallworld itself.
+		_return _super.responds_to?(message_name, private?)
+	_elif message_name.matches?(:|*()|)
+	_then
+		# Try to find matching method.
+		_local methods << _self.get_class().get_declared_methods()
+		_for idx _over 0.upto(methods.length.int!wrapped - 1)
+		_loop
+			_local method << methods[idx]
+			_if method.get_name().int!wrapped + "()" = message_name.write_string.as_camel_case()
+			_then
+				_return _true
+			_endif
+		_endloop
+		_return _false
+	_endif
+
+	# Test if field exists.
+	_local fields << _self.get_class().get_declared_fields()
+	_for idx _over 0.upto(fields.length.int!wrapped - 1)
+	_loop
+		_local field << fields[idx]
+		_if field.get_name().int!wrapped = message_name.write_string.as_camel_case()
+		_then
+			_return _true
+		_endif
+	_endloop
+
+	_return _false
+_endmethod
+$
+
+_pragma(classify_level=advanced, topic={java_object_wrapper})
+_method java_object_wrapper.apropos(str, _optional including_private?, including_system?)
+	## Apropos.
+	## @param {sw:char16_vector|sw:symbol} str
+	## @param {sw:false} including_private?
+	## @param {sw:false} including_system?
+	_super.apropos(str, including_private?, including_system?)
+
+	# Methods.
+	_local clazz << _self.get_class()
+	_local methods << clazz.get_declared_methods()
+	_local name_sorter <<
+		_proc(item_a, item_b)
+			_return item_a.get_name().int!wrapped _cf item_b.get_name().int!wrapped
+		_endproc
+	_local sorted_methods << sorted_collection.new(methods.length.int!wrapped, name_sorter)
+	_for idx _over 0.upto(methods.length.int!wrapped - 1)
+	_loop
+		_local method << methods[idx]
+		sorted_methods.add(method)
+	_endloop
+
+	_local match_pattern << write_string("*", str, "*")
+	_for method _over sorted_methods.fast_elements()
+	_loop
+		_local method_name << method.get_name().int!wrapped
+		_if _not method_name.matches?(match_pattern)
+		_then
+			_continue
+		_endif
+
+		_local parameter_strs << rope.new()
+		_for idx _over 0.upto(method.get_parameter_count().int!wrapped - 1)
+		_loop
+			_local parameter << method.get_parameter_types()[idx]
+			_local parameter_str << parameter.get_name().int!wrapped
+			parameter_strs.add(parameter_str)
+		_endloop
+
+		_local prefix << "java method"
+
+		write(
+			prefix,
+			" ",
+			method.get_declaring_class().get_name().int!wrapped,
+			".",
+			method.get_name().int!wrapped,
+			"(",
+			parameter_strs.join_as_strings(","),
+			")")
+	_endloop
+
+	# Fields.
+	_local fields << clazz.get_declared_fields()
+	_local sorted_fields << sorted_collection.new(fields.length.int!wrapped, name_sorter)
+	_for idx _over 0.upto(fields.length.int!wrapped - 1)
+	_loop
+		_local field << fields[idx]
+		sorted_fields.add(field)
+	_endloop
+
+	_for field _over sorted_fields.fast_elements()
+	_loop
+		_local field_name << field.get_name().int!wrapped
+		_if _not field_name.matches?(match_pattern)
+		_then
+			_continue
+		_endif
+
+		_local modifiers << field.get_modifiers()
+		_local is_static? <<
+			java_object_wrapper.int!invoke_static_method("java.lang.reflect.Modifier", "isStatic", modifiers)
+		_local prefix <<
+			_if is_static? _is _true
+			_then
+				>> "java static field "
+			_else
+				>> "java field "
+			_endif
+		write(
+			prefix,
+			" ",
+			field.get_declaring_class().get_name().int!wrapped,
+			".",
+			field.get_name().int!wrapped,
+			" ",
+			field.get_type().get_name().int!wrapped)
+	_endloop
+_endmethod
+$
+
+_pragma(classify_level=advanced, topic={java_object_wrapper})
+java_object_wrapper.define_show_attributes(
+	:int!wrapped)
+$

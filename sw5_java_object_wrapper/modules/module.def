@@ -1,0 +1,5 @@
+sw5_java_object_wrapper 1
+
+requires_java
+    sw5_java_object_wrapper
+end

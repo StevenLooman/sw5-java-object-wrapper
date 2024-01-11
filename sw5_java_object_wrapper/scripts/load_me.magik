@@ -1,0 +1,26 @@
+#% text_encoding = iso8859_1
+
+_block
+	_local product_dir << system.pathname_up(!source_file!, 2)
+	smallworld_product.add_product(product_dir)
+	sw_module_manager.load_module(:sw5_java_object_wrapper, _unset, :force_reload?, _true)
+_endblock
+$
+
+_block
+	_local list << java_object_wrapper.new_constructed("java.util.ArrayList")
+	_local item1 << java_object_wrapper.new_constructed("java.lang.String", "string1")
+	list.add(item1)
+	_local item2 << java_object_wrapper.new_constructed("java.lang.String", "string2")
+	list.add(item2)
+	write("List size: ", list.size().int!wrapped)
+	write("List string: ", list.to_string())
+_endblock
+$
+
+_block
+	# Get java.lang.System.getProperty("java.version")
+	_local jvm_version << java_object_wrapper.int!invoke_static_method("java.lang.System", "getProperty", "java.version")
+	write("JVM version: ", jvm_version.int!wrapped)
+_endblock
+$
