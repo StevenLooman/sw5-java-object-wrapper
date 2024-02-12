@@ -6,7 +6,7 @@
 
   <groupId>nl.ramsolutions</groupId>
   <artifactId>sw5_java_object_wrapper</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <name>sw5_java_object_wrapper</name>
   <description>Smallworld5 Java Object Wrapper</description>
