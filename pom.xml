@@ -37,7 +37,7 @@
     <smallworld.core>/opt/Smallworld/core</smallworld.core>
     <smallworld.version>5.3.0.0-490</smallworld.version>
 
-    <commons.lang3.version>3.11</commons.lang3.version>
+    <commons.lang3.version>3.18.0</commons.lang3.version>
 
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <checkstyle.version>9.2.1</checkstyle.version>
