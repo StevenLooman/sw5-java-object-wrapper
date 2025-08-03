@@ -44,7 +44,7 @@
     <checkstyle-rules.version>7.0.1</checkstyle-rules.version>
 
     <spotbugs-maven-plugin.version>4.9.3.2</spotbugs-maven-plugin.version>
-    <spotbugs.version>4.5.2</spotbugs.version>
+    <spotbugs.version>4.9.3</spotbugs.version>
 
     <junit.version>5.13.4</junit.version>
   </properties>
